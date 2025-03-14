@@ -33,7 +33,7 @@ def get_current_price():
         print(f"Error fetching current price: {e}")
         # Return fallback data
         return {
-            "currentPrice": 76.42,
+            "currentPrice": 76.5,
             "previousClose": 77.70,
             "change": -1.28,
             "changePercent": -1.65,
@@ -233,7 +233,7 @@ with open('static/index.html', 'w') as f:
     <div class="container">
         <div class="header">
             <h1>My BABA Trading Dashboard</h1>
-            <p>Track your Alibaba trading performance</p>
+            <p>Tracking Alibaba trading performance</p>
         </div>
         
         <div class="dashboard">
@@ -244,7 +244,6 @@ with open('static/index.html', 'w') as f:
                 </div>
                 <div class="last-updated" id="last-updated"></div>
                 <div class="api-status" id="api-status"></div>
-                <button class="toggle-button" id="update-button">Refresh Price</button>
             </div>
             
             <div class="card">
@@ -376,7 +375,7 @@ with open('static/index.html', 'w') as f:
                 const data = await response.json();
                 
                 // Update price display
-                document.getElementById('price-container').innerHTML = formatCurrentPrice(data);
+                document.getElementById('price-container').innerHTML = formatCurrentPrice(price_data["CurrentPrice");
                 
                 // Update last updated time
                 const now = new Date();
