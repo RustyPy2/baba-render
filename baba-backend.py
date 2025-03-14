@@ -366,59 +366,57 @@ with open('static/index.html', 'w') as f:
         }
         
         // Function to fetch current price from our backend
-        // ... existing code ...
-async function fetchCurrentPrice() {
-    try {
-        const response = await fetch('/api/current-price');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        
-        // Update price display
-        // Fix: Remove price_data["CurrentPrice"] and use data directly
-        document.getElementById('price-container').innerHTML = formatCurrentPrice(data);
-        
-        // Update last updated time
-        const now = new Date();
-        document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
-        document.getElementById('api-status').textContent = 'Data from yfinance API';
-        
-        return data;
-            } catch (error) {
-                console.error('Error fetching price data:', error);
-                document.getElementById('price-container').innerHTML = `
-                    <div class="loading">Error loading price data. Please try again later.</div>
-                `;
-                document.getElementById('api-status').textContent = 'Failed to fetch data from API';
-                return null;
-            }
-        }
-        
-        // Function to fetch historical data from our backend
-    async function fetchHistoricalData() {
+    async function fetchCurrentPrice() {
         try {
-            const response = await fetch('/api/historical-data');
-            if (!response.ok) throw new Error('Failed to fetch data');
-            const data = await response.json();
-        
-        // Update chart data
-            chartData.labels = data.dates;
-            chartData.datasets[0].data = data.prices;
-        
-        // Initialize chart if it doesn't exist
-            if (!priceChart) {
-                initChart();
-            } else {
-                priceChart.update();
+            const response = await fetch('/api/current-price');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        
-            document.getElementById('chart-loading').style.display = 'none';
-        } catch (error) {
-            console.error('Error fetching historical data:', error);
-            document.getElementById('chart-loading').textContent = 'Failed to load data';
+            const data = await response.json();
+            
+            // Update price display
+             document.getElementById('price-container').innerHTML = formatCurrentPrice(data["currentPrice"]);
+            
+            // Update last updated time
+            const now = new Date();
+            document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
+            document.getElementById('api-status').textContent = 'Data from yfinance API';
+            
+            return data;
+                } catch (error) {
+                    console.error('Error fetching price data:', error);
+                    document.getElementById('price-container').innerHTML = `
+                        <div class="loading">Error loading price data. Please try again later.</div>
+                    `;
+                    document.getElementById('api-status').textContent = 'Failed to fetch data from API';
+                    return null;
+                }
+            }
+            
+            // Function to fetch historical data from our backend
+        async function fetchHistoricalData() {
+            try {
+                const response = await fetch('/api/historical-data');
+                if (!response.ok) throw new Error('Failed to fetch data');
+                const data = await response.json();
+            
+            // Update chart data
+                chartData.labels = data.dates;
+                chartData.datasets[0].data = data.prices;
+            
+            // Initialize chart if it doesn't exist
+                if (!priceChart) {
+                    initChart();
+                } else {
+                    priceChart.update();
+                }
+            
+                document.getElementById('chart-loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+                document.getElementById('chart-loading').textContent = 'Failed to load data';
+            }
         }
-}
 
 // Add periodic updates for both current price and chart
 function startUpdates() {
