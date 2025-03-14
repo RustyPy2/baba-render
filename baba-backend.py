@@ -5,8 +5,69 @@ from flask import Flask, jsonify, send_from_directory
 import os
 import requests
 from requests.exceptions import RequestException
+import numpy as np
+from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='static')
+def calcualte_profit():
+
+# Sample data - replace with your actual trading profit data
+# This creates 30 days of sample data
+dates = [datetime.now() - timedelta(days=i) for i in range(30, 0, -1)]
+profits = [69, 492,186]  # Starting with 0 profit
+
+# Create DataFrame
+df = pd.DataFrame({
+    'Date': dates,
+    'Profit': profits[1:]  # Remove the initial 0
+})
+
+# Sort by date (ascending)
+df = df.sort_values('Date')
+
+# Calculate cumulative profit
+df['Cumulative_Profit'] = df['Profit'].cumsum()
+
+# Create figure and axis
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Plot the data
+ax.plot(df['Date'], df['Cumulative_Profit'], color='#1f77b4', linewidth=2.5, marker='o', markersize=4)
+
+# Add a horizontal line at y=0
+ax.axhline(y=0, color='gray', linestyle='--', alpha=0.7)
+
+# Fill area between line and zero line
+ax.fill_between(df['Date'], df['Cumulative_Profit'], 0, 
+                where=(df['Cumulative_Profit'] >= 0), color='green', alpha=0.2)
+ax.fill_between(df['Date'], df['Cumulative_Profit'], 0, 
+                where=(df['Cumulative_Profit'] < 0), color='red', alpha=0.2)
+
+# Format the x-axis to show dates nicely
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+plt.xticks(rotation=45)
+
+# Add labels and title
+plt.title('Cumulative Trading Profit Over Time', fontsize=16, pad=20)
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Cumulative Profit ($)', fontsize=12)
+
+# Add grid
+plt.grid(True, alpha=0.3)
+
+# Identify and annotate highest and lowest points
+max_profit_idx = df['Cumulative_Profit'].idxmax()
+min_profit_idx = df['Cumulative_Profit'].idxmin()
+
+plt.annotate(f'Max: ${df["Cumulative_Profit"][max_profit_idx]:.2f}',
+             xy=(df['Date'][max_profit_idx], df['Cumulative_Profit'][max_profit_idx]),
+             xytext=(10, 10), textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2'))
+
+plt.annotate(f'Min: ${df["Cumulative_Profit"][min_profit_idx]:.2f}',
+             xy=(df['Date'][min_profit_idx], df['Cumulative_Profit'][min_profit_idx]),
+             xytext=(10, -15), textcoords='offset points',
+             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2'))
 
 def get_current_price():
 
@@ -342,31 +403,65 @@ with open('static/index.html', 'w') as f:
         
         // Function to fetch current price from our backend
     async function fetchlastPrice() {
-        try {
-            const response = await fetch('/api/current-price');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            
-            // Update price display
-             document.getElementById('price-container').innerHTML = formatlastPrice(data["lastPrice"]);
-            
-            // Update last updated time
-            const now = new Date();
-            document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
-            document.getElementById('api-status').textContent = 'Data from yfinance API';
-            
-            return data;
-                } catch (error) {
-                    console.error('Error fetching price data:', error);
-                    document.getElementById('price-container').innerHTML = `
-                        <div class="loading">Error loading price data. Please try again later.</div>
-                    `;
-                    document.getElementById('api-status').textContent = 'Failed to fetch data from API';
-                    return null;
-                }
-            }
+                # Create figure and axis
+                fig, ax = plt.subplots(figsize=(12, 6))
+        
+                # Plot the data
+                ax.plot(df['Date'], df['Cumulative_Profit'], color='#1f77b4', linewidth=2.5, marker='o', markersize=4)
+                
+                # Add a horizontal line at y=0
+                ax.axhline(y=0, color='gray', linestyle='--', alpha=0.7)
+                
+                # Fill area between line and zero line
+                ax.fill_between(df['Date'], df['Cumulative_Profit'], 0, 
+                                where=(df['Cumulative_Profit'] >= 0), color='green', alpha=0.2)
+                ax.fill_between(df['Date'], df['Cumulative_Profit'], 0, 
+                                where=(df['Cumulative_Profit'] < 0), color='red', alpha=0.2)
+                
+                # Format the x-axis to show dates nicely
+                ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+                plt.xticks(rotation=45)
+                
+                # Add labels and title
+                plt.title('Cumulative Trading Profit Over Time', fontsize=16, pad=20)
+                plt.xlabel('Date', fontsize=12)
+                plt.ylabel('Cumulative Profit ($)', fontsize=12)
+                
+                # Add grid
+                plt.grid(True, alpha=0.3)
+                
+                # Identify and annotate highest and lowest points
+                max_profit_idx = df['Cumulative_Profit'].idxmax()
+                min_profit_idx = df['Cumulative_Profit'].idxmin()
+                
+                plt.annotate(f'Max: ${df["Cumulative_Profit"][max_profit_idx]:.2f}',
+                             xy=(df['Date'][max_profit_idx], df['Cumulative_Profit'][max_profit_idx]),
+                             xytext=(10, 10), textcoords='offset points',
+                             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2'))
+                
+                plt.annotate(f'Min: ${df["Cumulative_Profit"][min_profit_idx]:.2f}',
+                             xy=(df['Date'][min_profit_idx], df['Cumulative_Profit'][min_profit_idx]),
+                             xytext=(10, -15), textcoords='offset points',
+                             arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2'))
+                
+                # Add summary statistics in a text box
+                current_profit = df['Cumulative_Profit'].iloc[-1]
+                profit_change = df['Cumulative_Profit'].iloc[-1] - df['Cumulative_Profit'].iloc[0]
+                profit_pct = (profit_change / abs(df['Cumulative_Profit'].iloc[0])) * 100 if df['Cumulative_Profit'].iloc[0] != 0 else 0
+                
+                textstr = f'Current Profit: ${current_profit:.2f}\n'
+                textstr += f'Period Change: ${profit_change:.2f} ({profit_pct:.1f}%)\n'
+                textstr += f'Max Drawdown: ${df["Cumulative_Profit"].min() - df["Cumulative_Profit"].iloc[0]:.2f}'
+                
+                props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+                plt.text(0.02, 0.05, textstr, transform=ax.transAxes, fontsize=10,
+                         verticalalignment='bottom', bbox=props)
+                
+                # Tight layout
+                plt.tight_layout()
+                
+                # Show the plot
+                plt.show()
             
             // Function to fetch historical data from our backend
         async function fetchHistoricalData() {
@@ -392,19 +487,6 @@ with open('static/index.html', 'w') as f:
                 document.getElementById('chart-loading').textContent = 'Failed to load data';
             }
         }
-
-// Add periodic updates for both current price and chart
-
-function startUpdates() {
-    // Initial fetches
-    fetchlastPrice();
-    fetchHistoricalData();
-    
-    // Set up periodic updates with longer intervals
-    setInterval(fetchlastPrice, 300000);  // Update price every 5 minutes instead of every minute
-    setInterval(fetchHistoricalData, 900000); // Update chart every 15 minutes instead of every 5 minutes
-}
-
 // Change the DOMContentLoaded event to use startUpdates
 document.addEventListener("DOMContentLoaded", startUpdates);
                 </script>
