@@ -8,71 +8,23 @@ from requests.exceptions import RequestException
 
 app = Flask(__name__, static_folder='static')
 
-@app.route('/test')
-def test():
-    return jsonify({"status": "Server is running!"})
-
-import yfinance as yf
-import time
-from functools import lru_cache
-import requests
-from requests.exceptions import RequestException
-
-# Add retry decorator
-def retry_on_failure(max_attempts=3, delay_seconds=2):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    print(f"Attempt {attempt + 1} failed: {str(e)}")
-                    if attempt < max_attempts - 1:
-                        time.sleep(delay_seconds)
-                    else:
-                        raise
-            return None
-        return wrapper
-    return decorator
-
-@retry_on_failure(max_attempts=3)
-def get_ticker_data():
-    # Force a fresh session for each request
-    session = requests.Session()
-    ticker = yf.Ticker("APPL", session=session)
-    return ticker.fast_info
-
 def get_current_price():
-    global last_price_update, cached_price_data
-    current_time = time.time()
+
+        ticker = yf.Ticker("BABA")
+        info = ticker.fast_info
     
-    # Return cached data if it's less than CACHE_EXPIRATION seconds old
-    if cached_price_data and (current_time - last_price_update) < CACHE_EXPIRATION:
-        return cached_price_data
-    
-    try:
-        # Get ticker info with retry logic
-        info = get_ticker_data()
-        
-        if info is None:
-            raise Exception("Failed to fetch ticker data")
-            
         # Extract relevant data
         price_data = {
-            "currentPrice": float(info.get("lastPrice", 0) or info.get("regularMarketPrice", 0)),
-            "previousClose": float(info.get("previousClose", 0)),
-            "dayLow": float(info.get("dayLow", 0)),
-            "dayHigh": float(info.get("dayHigh", 0)),
-            "fiftyTwoWeekLow": float(info.get("fiftyTwoWeekLow", 0)),
-            "fiftyTwoWeekHigh": float(info.get("fiftyTwoWeekHigh", 0))
+            "lastPrice": info.get("lastPrice"),
+            "previousClose": info.get("previousClose"),
+            "dayLow": info.get("dayLow", 0),
+            "dayHigh": info.get("dayHigh"),
+            "fiftyTwoWeekLow": info.get("fiftyTwoWeekLow"),
+            "fiftyTwoWeekHigh": info.get("fiftyTwoWeekHigh")
         }
         
-        # Validate data
-        if price_data["currentPrice"] == 0:
-            raise Exception("Invalid price data received")
-        
         # Calculate change
-        price_data["change"] = price_data["currentPrice"] - price_data["previousClose"]
+        price_data["change"] = price_data["lastPrice"] - price_data["previousClose"]
         price_data["changePercent"] = (price_data["change"] / price_data["previousClose"]) * 100
         
         # Update cache
@@ -91,7 +43,7 @@ def get_current_price():
             
         print("Returning fallback data")
         return {
-            "currentPrice": 76.5,
+            "lastPrice": 76.5,
             "previousClose": 77.70,
             "change": -1.28,
             "changePercent": -1.65,
@@ -392,8 +344,8 @@ with open('static/index.html', 'w') as f:
         }
         
         // Function to format current price data
-        function formatCurrentPrice(data) {
-            const price = data.currentPrice.toFixed(2);
+        function formatlastPrice(data) {
+            const price = data.lastPrice.toFixed(2);
             const change = data.change.toFixed(2);
             const changePercent = data.changePercent.toFixed(2);
             const dayLow = data.dayLow.toFixed(2);
@@ -427,7 +379,7 @@ with open('static/index.html', 'w') as f:
         }
         
         // Function to fetch current price from our backend
-    async function fetchCurrentPrice() {
+    async function fetchlastPrice() {
         try {
             const response = await fetch('/api/current-price');
             if (!response.ok) {
@@ -436,7 +388,7 @@ with open('static/index.html', 'w') as f:
             const data = await response.json();
             
             // Update price display
-             document.getElementById('price-container').innerHTML = formatCurrentPrice(data["currentPrice"]);
+             document.getElementById('price-container').innerHTML = formatlastPrice(data["lastPrice"]);
             
             // Update last updated time
             const now = new Date();
@@ -483,11 +435,11 @@ with open('static/index.html', 'w') as f:
 
 function startUpdates() {
     // Initial fetches
-    fetchCurrentPrice();
+    fetchlastPrice();
     fetchHistoricalData();
     
     // Set up periodic updates with longer intervals
-    setInterval(fetchCurrentPrice, 300000);  // Update price every 5 minutes instead of every minute
+    setInterval(fetchlastPrice, 300000);  // Update price every 5 minutes instead of every minute
     setInterval(fetchHistoricalData, 900000); // Update chart every 15 minutes instead of every 5 minutes
 }
 
