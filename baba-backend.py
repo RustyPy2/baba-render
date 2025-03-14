@@ -398,22 +398,20 @@ with open('static/index.html', 'w') as f:
         async function fetchHistoricalData() {
             try {
                 const response = await fetch('/api/historical-data');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                )
+                if (!response.ok) throw new Error('Failed to fetch data');
                 const data = await response.json();
-                
-                // Update chart data
                 chartData.labels = data.dates;
                 chartData.datasets[0].data = data.prices;
+                if (!priceChart) initChart();
                 priceChart.update();
-                
-                // Hide loading message
                 document.getElementById('chart-loading').style.display = 'none';
-                }
-                
-           
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+                document.getElementById('chart-loading').textContent = 'Failed to load data';
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", fetchHistoricalData);
                 </script>
                 </body>
                 </html>""")
