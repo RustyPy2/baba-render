@@ -5,6 +5,17 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
+const express = require('express')
+const app = express()
+const port = os.getenv("PORT")
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
+
 # Function to get current BABA price data
 def get_current_price():
     try:
