@@ -252,39 +252,35 @@ with open('static/index.html', 'w') as f:
                 <table class="profit-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Shares</th>
-                            <th>Buy Price</th>
-                            <th>Sell Price</th>
+                            <th>Date Closed</th>
+                            <th>Strikes</th>
+                            <th>Credit Received</th>
                             <th>Profit</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- Add your trade history here -->
                         <tr>
-                            <td>2025-01-15</td>
-                            <td>50</td>
-                            <td>$68.50</td>
-                            <td>$74.25</td>
-                            <td class="positive">+$287.50</td>
+                            <td>01-28-2025</td>
+                            <td>85</td>
+                            <td>$108</td>
+                            <td class="positive">+$69</td>
                         </tr>
                         <tr>
-                            <td>2025-02-03</td>
-                            <td>75</td>
-                            <td>$72.10</td>
-                            <td>$78.40</td>
-                            <td class="positive">+$472.50</td>
+                            <td>02-07-2025</td>
+                            <td>85/97</td>
+                            <td>$969</td>
+                            <td class="positive">+$492</td>
                         </tr>
                         <tr>
-                            <td>2025-02-28</td>
-                            <td>100</td>
-                            <td>$79.30</td>
-                            <td>$77.50</td>
-                            <td class="negative">-$180.00</td>
+                            <td>02-12-2025</td>
+                            <td>104</td>
+                            <td>$335</td>
+                            <td class="positive">+$186</td>>
                         </tr>
                     </tbody>
                 </table>
-                <div class="total-profit positive">Total Profit: +$580.00</div>
+                <div class="total-profit positive">Total Profit: +$1752.00</div>
             </div>
         </div>
         
