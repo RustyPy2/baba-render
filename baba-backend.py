@@ -1,4 +1,5 @@
 import yfinance as yf
+import time
 import pandas as pd
 from flask import Flask, jsonify, send_from_directory
 import os
@@ -423,14 +424,15 @@ with open('static/index.html', 'w') as f:
         }
 
 // Add periodic updates for both current price and chart
+
 function startUpdates() {
     // Initial fetches
     fetchCurrentPrice();
     fetchHistoricalData();
     
-    // Set up periodic updates
-    setInterval(fetchCurrentPrice, 60000); // Update price every minute
-    setInterval(fetchHistoricalData, 300000); // Update chart every 5 minutes
+    // Set up periodic updates with longer intervals
+    setInterval(fetchCurrentPrice, 300000);  // Update price every 5 minutes instead of every minute
+    setInterval(fetchHistoricalData, 900000); // Update chart every 15 minutes instead of every 5 minutes
 }
 
 // Change the DOMContentLoaded event to use startUpdates
