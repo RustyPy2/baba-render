@@ -5,7 +5,6 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
-const express = require('express')
 const app = express()
 const port = os.getenv("PORT")
 app.get('/', (req, res) => {
