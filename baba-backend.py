@@ -413,7 +413,7 @@ with open('static/index.html', 'w') as f:
                 priceChart.update();
                 
                 // Hide loading message
-                document.getElementById('chart-loading').style.display = 'none'  });
+                document.getElementById('chart-loading').style.display = 'none'  }));
                 </script>
                 </body>
                 </html>"""
