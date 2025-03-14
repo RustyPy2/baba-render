@@ -422,4 +422,4 @@ with open('static/index.html', 'w') as f:
                 </body>
                 </html>""")
     if __name__ == "__main__":
-        app.run()
+        app.run(host='0.0.0.0', port=10080, debug=False)
