@@ -39,7 +39,7 @@ def retry_on_failure(max_attempts=3, delay_seconds=2):
 def get_ticker_data():
     # Force a fresh session for each request
     session = requests.Session()
-    ticker = yf.Ticker("BABA", session=session)
+    ticker = yf.Ticker("APPL", session=session)
     return ticker.fast_info
 
 def get_current_price():
