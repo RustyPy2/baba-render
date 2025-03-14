@@ -394,25 +394,45 @@ with open('static/index.html', 'w') as f:
         }
         
         // Function to fetch historical data from our backend
-        async function fetchHistoricalData() {
-            try {
-                const response = await fetch('/api/historical-data');
-                if (!response.ok) throw new Error('Failed to fetch data');
-                const data = await response.json();
-                chartData.labels = data.dates;
-                chartData.datasets[0].data = data.prices;
-                if (!priceChart) initChart();
-                priceChart.update();
-                document.getElementById('chart-loading').style.display = 'none';
-            } catch (error) {
-                console.error('Error fetching historical data:', error);
-                document.getElementById('chart-loading').textContent = 'Failed to load data';
-            }
-        }
+    async function fetchHistoricalData() {
+        try {
+            const response = await fetch('/api/historical-data');
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const data = await response.json();
         
-        document.addEventListener("DOMContentLoaded", fetchHistoricalData);
+        // Update chart data
+            chartData.labels = data.dates;
+            chartData.datasets[0].data = data.prices;
+        
+        // Initialize chart if it doesn't exist
+            if (!priceChart) {
+                initChart();
+            } else {
+                priceChart.update();
+            }
+        
+            document.getElementById('chart-loading').style.display = 'none';
+        } catch (error) {
+            console.error('Error fetching historical data:', error);
+            document.getElementById('chart-loading').textContent = 'Failed to load data';
+        }
+}
+
+// Add periodic updates for both current price and chart
+function startUpdates() {
+    // Initial fetches
+    fetchCurrentPrice();
+    fetchHistoricalData();
+    
+    // Set up periodic updates
+    setInterval(fetchCurrentPrice, 60000); // Update price every minute
+    setInterval(fetchHistoricalData, 300000); // Update chart every 5 minutes
+}
+
+// Change the DOMContentLoaded event to use startUpdates
+document.addEventListener("DOMContentLoaded", startUpdates);
                 </script>
                 </body>
                 </html>""")
     if __name__ == "__main__":
-        app.run(host='0.0.0.0', port=10080, debug=False)
+        app.run(host='0.0.0.0', port=10080, debug=True)
