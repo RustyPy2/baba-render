@@ -3,6 +3,8 @@ import time
 import pandas as pd
 from flask import Flask, jsonify, send_from_directory
 import os
+import requests
+from requests.exceptions import RequestException
 
 app = Flask(__name__, static_folder='static')
 
@@ -10,33 +12,84 @@ app = Flask(__name__, static_folder='static')
 def test():
     return jsonify({"status": "Server is running!"})
 
-# Function to get current BABA price data
+import yfinance as yf
+import time
+from functools import lru_cache
+import requests
+from requests.exceptions import RequestException
+
+# Add retry decorator
+def retry_on_failure(max_attempts=3, delay_seconds=2):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed: {str(e)}")
+                    if attempt < max_attempts - 1:
+                        time.sleep(delay_seconds)
+                    else:
+                        raise
+            return None
+        return wrapper
+    return decorator
+
+@retry_on_failure(max_attempts=3)
+def get_ticker_data():
+    # Force a fresh session for each request
+    session = requests.Session()
+    ticker = yf.Ticker("BABA", session=session)
+    return ticker.fast_info
+
 def get_current_price():
+    global last_price_update, cached_price_data
+    current_time = time.time()
+    
+    # Return cached data if it's less than CACHE_EXPIRATION seconds old
+    if cached_price_data and (current_time - last_price_update) < CACHE_EXPIRATION:
+        return cached_price_data
+    
     try:
-        # Get ticker info
-        ticker = yf.Ticker("BABA")
+        # Get ticker info with retry logic
+        info = get_ticker_data()
         
-        # Get current price info
-        info = ticker.fast_info
-        
+        if info is None:
+            raise Exception("Failed to fetch ticker data")
+            
         # Extract relevant data
         price_data = {
-            "currentPrice": info.get("currentPrice", 0),
-            "previousClose": info.get("previousClose", 0),
-            "dayLow": info.get("dayLow", 0),
-            "dayHigh": info.get("dayHigh", 0),
-            "fiftyTwoWeekLow": info.get("fiftyTwoWeekLow", 0),
-            "fiftyTwoWeekHigh": info.get("fiftyTwoWeekHigh", 0)
+            "currentPrice": float(info.get("lastPrice", 0) or info.get("regularMarketPrice", 0)),
+            "previousClose": float(info.get("previousClose", 0)),
+            "dayLow": float(info.get("dayLow", 0)),
+            "dayHigh": float(info.get("dayHigh", 0)),
+            "fiftyTwoWeekLow": float(info.get("fiftyTwoWeekLow", 0)),
+            "fiftyTwoWeekHigh": float(info.get("fiftyTwoWeekHigh", 0))
         }
+        
+        # Validate data
+        if price_data["currentPrice"] == 0:
+            raise Exception("Invalid price data received")
         
         # Calculate change
         price_data["change"] = price_data["currentPrice"] - price_data["previousClose"]
         price_data["changePercent"] = (price_data["change"] / price_data["previousClose"]) * 100
         
+        # Update cache
+        cached_price_data = price_data
+        last_price_update = current_time
+        
+        print(f"Successfully fetched price data: {price_data}")  # Debug log
         return price_data
+        
     except Exception as e:
-        print(f"Error fetching current price: {e}")
-        # Return fallback data
+        print(f"Error fetching current price: {str(e)}")
+        # Return cached data if available, otherwise fallback data
+        if cached_price_data:
+            print("Returning cached data")
+            return cached_price_data
+            
+        print("Returning fallback data")
         return {
             "currentPrice": 76.5,
             "previousClose": 77.70,
@@ -48,21 +101,24 @@ def get_current_price():
             "fiftyTwoWeekHigh": 112.09
         }
 
-# Function to get historical price data
+@retry_on_failure(max_attempts=3)
 def get_historical_data():
     try:
-        # Get ticker history
-        ticker = yf.Ticker("BABA")
+        session = requests.Session()
+        ticker = yf.Ticker("BABA", session=session)
         hist = ticker.history(period="6mo")
         
-        # Extract dates and closing prices
+        if hist.empty:
+            raise Exception("No historical data received")
+        
         dates = hist.index.strftime('%Y-%m-%d').tolist()
         prices = hist['Close'].tolist()
         
+        print(f"Successfully fetched historical data with {len(dates)} points")
         return {"dates": dates, "prices": prices}
+        
     except Exception as e:
-        print(f"Error fetching historical data: {e}")
-        # Return fallback data
+        print(f"Error fetching historical data: {str(e)}")
         return {
             "dates": [
                 "2024-09-12", "2024-09-26", "2024-10-10", "2024-10-24", 
