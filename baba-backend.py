@@ -366,23 +366,25 @@ with open('static/index.html', 'w') as f:
         }
         
         // Function to fetch current price from our backend
-        async function fetchCurrentPrice() {
-            try {
-                const response = await fetch('/api/current-price');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                
-                // Update price display
-                document.getElementById('price-container').innerHTML = formatCurrentPrice(price_data["CurrentPrice"]);
-                
-                // Update last updated time
-                const now = new Date();
-                document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
-                document.getElementById('api-status').textContent = 'Data from yfinance API';
-                
-                return data;
+        // ... existing code ...
+async function fetchCurrentPrice() {
+    try {
+        const response = await fetch('/api/current-price');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        
+        // Update price display
+        // Fix: Remove price_data["CurrentPrice"] and use data directly
+        document.getElementById('price-container').innerHTML = formatCurrentPrice(data);
+        
+        // Update last updated time
+        const now = new Date();
+        document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleString()}`;
+        document.getElementById('api-status').textContent = 'Data from yfinance API';
+        
+        return data;
             } catch (error) {
                 console.error('Error fetching price data:', error);
                 document.getElementById('price-container').innerHTML = `
