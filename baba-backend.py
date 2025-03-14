@@ -421,3 +421,5 @@ with open('static/index.html', 'w') as f:
                 </script>
                 </body>
                 </html>""")
+    if __name__ == "__main__":
+        app.run()
