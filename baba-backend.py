@@ -375,7 +375,7 @@ with open('static/index.html', 'w') as f:
                 const data = await response.json();
                 
                 // Update price display
-                document.getElementById('price-container').innerHTML = formatCurrentPrice(price_data["CurrentPrice");
+                document.getElementById('price-container').innerHTML = formatCurrentPrice(price_data["CurrentPrice"]);
                 
                 // Update last updated time
                 const now = new Date();
@@ -435,4 +435,4 @@ document.addEventListener("DOMContentLoaded", startUpdates);
                 </body>
                 </html>""")
     if __name__ == "__main__":
-        app.run(host='0.0.0.0', port=10080, debug=True)
+        app.run(host='0.0.0.0', port=10080, debug=False)
