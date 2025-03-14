@@ -33,13 +33,6 @@ def get_current_price():
         
         print(f"Successfully fetched price data: {price_data}")  # Debug log
         return price_data
-        
-    except Exception as e:
-        print(f"Error fetching current price: {str(e)}")
-        # Return cached data if available, otherwise fallback data
-        if cached_price_data:
-            print("Returning cached data")
-            return cached_price_data
             
         print("Returning fallback data")
         return {
@@ -51,37 +44,6 @@ def get_current_price():
             "dayHigh": 77.90,
             "fiftyTwoWeekLow": 66.63,
             "fiftyTwoWeekHigh": 112.09
-        }
-
-@retry_on_failure(max_attempts=3)
-def get_historical_data():
-    try:
-        session = requests.Session()
-        ticker = yf.Ticker("BABA", session=session)
-        hist = ticker.history(period="6mo")
-        
-        if hist.empty:
-            raise Exception("No historical data received")
-        
-        dates = hist.index.strftime('%Y-%m-%d').tolist()
-        prices = hist['Close'].tolist()
-        
-        print(f"Successfully fetched historical data with {len(dates)} points")
-        return {"dates": dates, "prices": prices}
-        
-    except Exception as e:
-        print(f"Error fetching historical data: {str(e)}")
-        return {
-            "dates": [
-                "2024-09-12", "2024-09-26", "2024-10-10", "2024-10-24", 
-                "2024-11-07", "2024-11-21", "2024-12-05", "2024-12-19", 
-                "2025-01-02", "2025-01-16", "2025-01-30", "2025-02-13", 
-                "2025-02-27", "2025-03-10"
-            ],
-            "prices": [
-                82.45, 81.30, 80.20, 78.30, 75.20, 72.15, 70.50, 
-                68.90, 71.40, 74.25, 77.60, 79.80, 78.10, 76.42
-            ]
         }
 
 # API route for current price
