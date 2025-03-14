@@ -12,7 +12,7 @@ def get_current_price():
         ticker = yf.Ticker("BABA")
         
         # Get current price info
-        info = ticker.info
+        info = ticker.fast_info
         
         # Extract relevant data
         price_data = {
@@ -405,6 +405,7 @@ with open('static/index.html', 'w') as f:
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
+                )
                 const data = await response.json();
                 
                 // Update chart data
@@ -413,11 +414,10 @@ with open('static/index.html', 'w') as f:
                 priceChart.update();
                 
                 // Hide loading message
-                document.getElementById('chart-loading').style.display = 'none'  
-                )
+                document.getElementById('chart-loading').style.display = 'none';
+                }
                 
-                )
-                );
+           
                 </script>
                 </body>
-                </html>"""
+                </html>""")
