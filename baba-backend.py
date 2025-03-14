@@ -5,6 +5,10 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
+@app.route('/test')
+def test():
+    return jsonify({"status": "Server is running!"})
+
 # Function to get current BABA price data
 def get_current_price():
     try:
@@ -435,4 +439,5 @@ document.addEventListener("DOMContentLoaded", startUpdates);
                 </body>
                 </html>""")
     if __name__ == "__main__":
+        print("Server starting on http://localhost:10080")
         app.run(host='0.0.0.0', port=10080, debug=False)
