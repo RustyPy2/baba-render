@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
-const port = os.getenv("PORT")
+port = os.getenv("PORT")
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
